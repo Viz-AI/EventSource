@@ -77,9 +77,11 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
     static let DefaultRetryTime = 3000
 
     public let url: URL
+    public var headers: [String: String] = [:]
+    
     private(set) public var lastEventId: String?
     private(set) public var retryTime = EventSource.DefaultRetryTime
-    private(set) public var headers: [String: String]
+    
     private(set) public var readyState: EventSourceState
 
     private var onOpenCallback: (() -> Void)?
@@ -132,12 +134,12 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
         self.onMessageCallback = onMessageCallback
     }
 
-    public func addEventListener(_ event: String,
+    open func addEventListener(_ event: String,
                                  handler: @escaping ((_ id: String?, _ event: String?, _ data: String?) -> Void)) {
         eventListeners[event] = handler
     }
 
-	public func removeEventListener(_ event: String) {
+	open func removeEventListener(_ event: String) {
 		eventListeners.removeValue(forKey: event)
 	}
 
