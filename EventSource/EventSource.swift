@@ -104,15 +104,14 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
         readyState = EventSourceState.closed
         operationQueue = OperationQueue()
         operationQueue.maxConcurrentOperationCount = 1
-        operationQueue.isSuspended = true
+
         super.init()
     }
 
     public func connect(lastEventId: String? = nil) {
         eventStreamParser = EventStreamParser()
         readyState = .connecting
-        operationQueue.cancelAllOperations()
-        operationQueue.isSuspended = false
+
         let configuration = sessionConfiguration(lastEventId: lastEventId)
         urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: operationQueue)
         urlSession?.dataTask(with: url).resume()
@@ -120,9 +119,7 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
 
     public func disconnect() {
         readyState = .closed
-        operationQueue.isSuspended = true
         urlSession?.invalidateAndCancel()
-        operationQueue.cancelAllOperations()
     }
 
     public func onOpen(_ onOpenCallback: @escaping (() -> Void)) {
