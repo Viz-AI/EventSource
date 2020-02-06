@@ -21,7 +21,7 @@ public protocol EventSourceProtocol {
     var retryTime: Int { get }
 
     /// URL where EventSource will listen for events.
-    var url: URL { get }
+    var url: URL? { get }
 
     /// The last event id received from server. This id is neccesary to keep track of the last event-id received to avoid
     /// receiving duplicate events after a reconnection.
@@ -76,7 +76,7 @@ public protocol EventSourceProtocol {
 open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
     static let DefaultRetryTime = 3000
 
-    public let url: URL
+    public var url: URL?
     public var headers: [String: String] = [:]
     
     private(set) public var lastEventId: String?
@@ -95,12 +95,9 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
     private var urlSession: URLSession?
 
     public init(
-        url: URL,
         headers: [String: String] = [:]
     ) {
-        self.url = url
         self.headers = headers
-
         readyState = EventSourceState.closed
         operationQueue = OperationQueue()
         operationQueue.maxConcurrentOperationCount = 1
@@ -109,6 +106,9 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
     }
 
     public func connect(lastEventId: String? = nil) {
+        guard let url = url else {
+            fatalError("url was not set before connecting.")
+        }
         eventStreamParser = EventStreamParser()
         readyState = .connecting
 
